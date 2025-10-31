@@ -24,7 +24,5 @@ app.post("/webhook", (req, res) => {
   console.log("📩 Evento recebido:", JSON.stringify(req.body, null, 2));
   res.sendStatus(200);
 });
-
-app.listen(process.env.PORT || 3000, () =>
-  console.log(`🚀 Webhook online na porta ${process.env.PORT || 3000}`)
-);
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`🚀 Webhook online na porta ${PORT}`));
