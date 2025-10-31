@@ -1,10 +1,30 @@
 import express from "express";
+
 const app = express();
+app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("✅ Servidor rodando com sucesso!");
+// GET simples para health-check (opcional)
+app.get("/", (req, res) => res.send("OK"));
+
+// ✅ Validação do webhook da Meta
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = "lucasToken";
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    return res.status(200).send(challenge); // devolve o challenge cru
+  }
+  return res.sendStatus(403);
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`🚀 Servidor online na porta ${process.env.PORT || 3000}`);
+// ✅ Recebimento de notificações (mensagens, status, etc.)
+app.post("/webhook", (req, res) => {
+  console.log("📩 Evento recebido:", JSON.stringify(req.body, null, 2));
+  res.sendStatus(200);
 });
+
+app.listen(process.env.PORT || 3000, () =>
+  console.log(`🚀 Webhook online na porta ${process.env.PORT || 3000}`)
+);
