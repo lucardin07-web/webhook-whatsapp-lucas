@@ -3,26 +3,30 @@ import express from "express";
 const app = express();
 app.use(express.json());
 
-// GET simples para health-check (opcional)
+// Health-check
 app.get("/", (req, res) => res.send("OK"));
 
-// ✅ Validação do webhook da Meta
+// ✅ Validação do Webhook
 app.get("/webhook", (req, res) => {
   const VERIFY_TOKEN = "lucasToken";
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+  if (mode && token === VERIFY_TOKEN) {
+    console.log("🔗 Webhook validado com sucesso!");
     return res.status(200).send(challenge); // devolve o challenge cru
+  } else {
+    return res.sendStatus(403);
   }
-  return res.sendStatus(403);
 });
 
-// ✅ Recebimento de notificações (mensagens, status, etc.)
+// ✅ Receber eventos do WhatsApp
 app.post("/webhook", (req, res) => {
   console.log("📩 Evento recebido:", JSON.stringify(req.body, null, 2));
   res.sendStatus(200);
 });
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 Webhook online na porta ${PORT}`));
+
+app.listen(process.env.PORT || 10000, () =>
+  console.log(`🚀 Webhook online na porta ${process.env.PORT || 10000}`)
+);
